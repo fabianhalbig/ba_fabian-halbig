@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-db
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: status-db
+  template:
+    metadata:
+      labels:
+        app: status-db
+    spec:
+      containers:
+        - name: course-db
+          image: postgres:10
+          resources:
+            limits:
+              cpu: "1"
+              memory: "4Gi"
+            requests:
+              cpu: "1"
+              memory: "4Gi"
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: statusUser
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: db-password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: status-pv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: status-db
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: status-db
+  clusterIP: None

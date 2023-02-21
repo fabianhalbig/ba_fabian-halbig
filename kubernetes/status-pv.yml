@@ -1,0 +1,26 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: status-storageclass
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+  replication-type: regional-pd
+allowedTopologies:
+  - matchLabelExpressions:
+      - key: failure-domain.beta.kubernetes.io/zone
+        values:
+          - europe-west1-b
+          - europe-west1-c
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: status-pv
+spec:
+  storageClassName: status-storageclass
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Gi

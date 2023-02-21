@@ -1,0 +1,81 @@
+<div *ngIf="accessDenied">
+  <p>Zugriff verweigert, da Sie nicht der Coursersteller sind!</p>
+</div>
+<div *ngIf="alert" class="alert alert-success" role="alert">
+  <strong>Success!</strong> Der Task wurde erfolgreich gelöscht.
+</div>
+<div *ngIf="error" class="alert alert-danger" role="alert">
+  <strong>Warning!</strong> Der Task konnte nicht gelöscht werden.
+</div>
+
+<div *ngIf="!accessDenied">
+  <div class="container-fluid">
+    <div class="row justify-content-center bg-light">
+      <div class="col-12">
+        <h4 class="display-4">
+          Ihr Course <i>{{ course.title }}</i>
+        </h4>
+        <button
+          (click)="showTaskCreation(course.uuid)"
+          class="btn btn-primary float-right"
+        >
+          Task erstellen
+        </button>
+        <p class="lead">Course ID: {{ course.uuid }}</p>
+        <p class="lead">{{ course.description }}</p>
+        <hr class="my-4" />
+
+        <h5>Abonnenten des Courses:</h5>
+
+        <div class="row justify-content-left bg-light">
+          <div class="col-8">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">User ID</th>
+                  <th scope="col">Abgeschlossene Tasks</th>
+                </tr>
+              </thead>
+              <tr *ngFor="let sub of subscriber | keyvalue">
+                <td>{{ sub.key }}</td>
+                <td>{{ sub.value[0] }}</td>
+              </tr>
+            </table>
+            <span *ngIf="course.subscriber == ''"
+              >Aktuell hat kein User diesen Course abonniert!</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr class="my-4" />
+  <div class="container-fluid">
+    <h5>Tasks:</h5>
+    <span *ngIf="course.tasks == ''"
+      >Sie haben noch keinen Task für diesen Course erstellt!</span
+    >
+    <div class="row row-cols-1 row-cols-md-3 bg-light">
+      <div class="col mb-4" *ngFor="let t of course.tasks">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{ t.title }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+              Teil von {{ course.title }}
+            </h6>
+            <p class="card-text">
+              Von c abonnenten haben y Abonennten diesen Task abgeschlossen
+            </p>
+            <p class="deadline" style="color: red">
+              Deadline: {{ t.deadline }}
+            </p>
+            <button class="btn btn-danger" (click)="deleteTask(t.id)">
+              Task Löschen
+            </button>
+          </div>
+        </div>
+        <div>{{ subscriberList }}</div>
+      </div>
+    </div>
+  </div>
+</div>

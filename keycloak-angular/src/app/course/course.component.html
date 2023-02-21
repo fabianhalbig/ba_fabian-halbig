@@ -1,0 +1,137 @@
+<div *ngIf="alertDelete" class="alert alert-success" role="alert">
+  <strong>Success!</strong> Der Course wurde erfolgreich gelöscht.
+</div>
+<div *ngIf="errorDelete" class="alert alert-danger" role="alert">
+  <strong>Warning!</strong> Der Course konnte nicht gelöscht werden, da noch
+  Tasks und Abonnenten enthalten sind.
+</div>
+<div *ngIf="alertDeabo" class="alert alert-success" role="alert">
+  <strong>Success!</strong> Der Course wurde erfolgreich deabooniert.
+</div>
+<div *ngIf="errorDeabo" class="alert alert-danger" role="alert">
+  <strong>Warning!</strong> Der Course konnte nicht deabonniert werden.
+</div>
+
+<div class="container-fluid">
+  <div class="row justify-content-center bg-light">
+    <div class="col-12">
+      <h4 class="display-4">Eigene Courses</h4>
+      <a
+        class="btn btn-primary pull-right control-group"
+        routerLink="/course/create"
+        >Course erstellen</a
+      >
+      <p class="lead">
+        Erstelle einen eigene Course um Task mit Abonnenten zu teilen
+      </p>
+      <hr class="my-4" />
+    </div>
+    <div class="col-12">
+      <span *ngIf="CreatedCoursesOfUser == ''"
+        >Sie haben keine Courses erstellt!</span
+      >
+    </div>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-3 bg-light">
+    <div class="col mb-4" *ngFor="let c of CreatedCoursesOfUser">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ c.title }}</h5>
+          <h6 class="card-title inline">{{ c.uuid }}</h6>
+          <p class="card-text">{{ c.description }}</p>
+          <button
+            (click)="showCourseCreatorView(c.uuid)"
+            class="btn btn-primary"
+          >
+            Verwalten
+          </button>
+          <button
+            class="btn btn-danger"
+            (click)="openDelete(delete, c.uuid, c.title)"
+          >
+            Löschen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-fluid">
+  <div class="row justify-content-center bg-light">
+    <div class="col-12">
+      <h4 class="display-4">Abonnierte Courses</h4>
+      <hr class="my-4" />
+    </div>
+    <div class="col-12">
+      <span *ngIf="SubscribedCoursesOfUser == ''"
+        >Sie haben keine Courses abonniert!</span
+      >
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-3 bg-light">
+    <div class="col mb-4" *ngFor="let c of SubscribedCoursesOfUser">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ c.title }}</h5>
+          <h6 class="card-title inline">{{ c.uuid }}</h6>
+          <p class="card-text">{{ c.description }}</p>
+          <button (click)="showCourseSubView(c.uuid)" class="btn btn-primary">
+            Anzeigen
+          </button>
+          <button
+            class="btn btn-danger"
+            (click)="openDeabo(deabo, c.uuid, c.title)"
+          >
+            Deabonnieren
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #delete let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Achtung!</h4>
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    >
+      <span aria-hidden="true"> × </span>
+    </button>
+  </div>
+  <div class="modal-body">
+    Bitte bestätigen Sie das unwiederrufliche Löschen des Courses:
+    {{ deleteTitle }}.
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="closeModalDelete()">
+      Löschen
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #deabo let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Achtung!</h4>
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    >
+      <span aria-hidden="true"> × </span>
+    </button>
+  </div>
+  <div class="modal-body">
+    Bitte bestätigen das deabonnieren des Courses: {{ deaboTitle }}.
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="closeModalDeabo()">
+      Deabonnieren
+    </button>
+  </div>
+</ng-template>

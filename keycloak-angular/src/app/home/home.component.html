@@ -1,0 +1,30 @@
+<div *ngIf="alert" class="alert alert-success" role="alert">
+  <strong>Success!</strong> Der Course wurde erfolgreich abonniert.
+</div>
+<div *ngIf="error" class="alert alert-danger" role="alert">
+  <strong>Warning!</strong> Der Course konnte nicht abonniert werden, da Sie
+  bereits Abonnent oder Ersteller sind.
+</div>
+<div class="jumbotron">
+  <h4><span style="font-weight: normal">Course Abbonieren</span></h4>
+
+  <form [formGroup]="aboForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <input
+        size="35"
+        type="text"
+        placeholder="Kurs ID"
+        formControlName="aboUuid"
+      />
+    </div>
+    <button type="submit" class="btn btn-primary">Beitreten!</button>
+    <small class="form-text text-muted"
+      >Bitten geben sie hier die Kurs ID ein, die sie von ihren Kursleiter
+      erhalten.</small
+    >
+    <hr class="my-4" />
+  </form>
+  <button class="btn btn-secondaryy" type="submit" (click)="goToPublic()">
+    Informationen zum Course-Planner
+  </button>
+</div>

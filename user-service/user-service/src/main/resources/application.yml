@@ -1,0 +1,34 @@
+debug: true
+server:
+  port: 9070
+
+spring:
+  application:
+    name: user-service
+
+#---------------------------------------------------
+#Deployment on in kubernetes      
+#---------------------------------------------------
+eureka:
+  instance:
+    preferIpAddress: true
+    hostname: eureka-0
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+       defaultZone: http://eureka-0.eureka.default.svc.cluster.local:8761/eureka
+
+#---------------------------------------------------
+#Deployment on localhost      
+#---------------------------------------------------
+
+#eureka:
+#  instance:
+#    preferIpAddress: true
+#  client:
+#    registerWithEureka: true
+#    fetchRegistry: true
+#    serviceUrl:
+#       defaultZone: ${DISCOVERY}
+      

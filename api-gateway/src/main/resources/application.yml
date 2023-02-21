@@ -1,0 +1,117 @@
+server:
+  port: 8080
+
+#---------------------------------------------------
+#Deployment on kubernetes
+#---------------------------------------------------
+keycloak-client:
+  server-url: ${KEYCLOAK_SERVICE_ADDRESS}
+  realm: ${KEYCLOAK_REALM}
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: ${KEYCLOAK_CLIENT_ID}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: ${keycloak-client.server-url}/login/oauth2/code/keycloak
+            scope: openid
+        provider:
+          keycloak:
+            authorization-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/auth
+            token-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/token
+            user-info-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/userinfo
+            jwk-set-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/certs
+            user-name-attribute: name
+            user-info-authentication-method: header
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/certs
+  cloud:
+    gateway:
+      routes:
+        - id: course-service
+          uri: lb://course-service
+          predicates:
+            - Path=/api/course/**
+          filters:
+            - TokenRelay=
+            - RemoveRequestHeader=Cookie
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - TokenRelay=
+            - RemoveRequestHeader=Cookie
+eureka:
+  instance:
+     preferIpAddress: true
+     hostname: eureka-0
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-0.eureka.default.svc.cluster.local:8761/eureka
+
+     
+     
+#---------------------------------------------------
+#Deployment on docker 
+#---------------------------------------------------
+#keycloak-client:
+#  server-url: ${KEYCLOAK_SERVICE_ADDRESS}
+#  realm: ${KEYCLOAK_REALM}
+#spring:
+#  application:
+#    name: api-gateway
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          keycloak:
+#            provider: keycloak
+#            client-id: ${KEYCLOAK_CLIENT_ID}
+#            client-secret: ${KEYCLOAK_CLIENT_SECRET}
+#            authorization-grant-type: authorization_code
+#            redirect-uri: ${keycloak-client.server-url}/login/oauth2/code/keycloak
+#            scope: openid
+#        provider:
+#          keycloak:
+#            authorization-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/auth
+#            token-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/token
+#            user-info-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/userinfo
+#            jwk-set-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/certs
+#            user-name-attribute: name
+#            user-info-authentication-method: header
+#      resourceserver:
+#        jwt:
+#          jwk-set-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/certs
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: course-service
+#          uri: lb://course-service
+#          predicates:
+#            - Path=/api/course/**
+#          filters:
+#            - RemoveRequestHeader=Cookie
+#        - id: user-service
+#          uri: lb://user-service
+#          predicates:
+#            - Path=/api/user/**
+#          filters:
+#            - RemoveRequestHeader=Cookie
+#eureka:
+#  instance:
+#    preferIpAddress: true
+#  client:
+#    registerWithEureka: true
+#    fetchRegistry: true
+#    serviceUrl:
+#       defaultZone: ${DISCOVERY}
