@@ -1,0 +1,134 @@
+version: '3'
+services:
+  public-angular:
+      image: fabianhalbig/public-angular
+      container_name: angular-frontend
+      ports:
+      - 4201:80
+      volumes:
+        - ./public-angular/nginx.conf:/etc/nginx/nginx.conf
+        - ./public-angular/dist/public-angular/:/usr/share/nginx/html
+
+  keycloak-angular:
+      image: fabianhalbig/keycloak-angular
+      container_name: keycloak-angular
+      ports:
+       - 4200:80
+      volumes:
+        - ./keycloak-angular/nginx.conf:/etc/nginx/nginx.conf
+        - ./keycloak-angular/dist/keycloak-demo/:/usr/share/nginx/html
+      depends_on:
+        - keycloak-db
+        
+  keycloak-db:
+      image: mysql:5.7
+      container_name: keycloak-db
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: keycloak
+        MYSQL_USER: keycloak
+        MYSQL_PASSWORD: password
+      volumes:
+        - keycloak-data:/var/lib/mysql
+
+  keycloak:
+      image: quay.io/keycloak/keycloak:latest
+      container_name: keycloak
+      environment:
+        DB_VENDOR: MYSQL
+        DB_ADDR: keycloak-db
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_PASSWORD: password
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: admin
+      ports:
+        - 8080:8080
+      depends_on:
+        - keycloak-db
+
+  discovery:
+      container_name: discovery
+      image: fabianhalbig/eureka-server
+      ports:
+        - 8761:8761
+
+  api-cloud-gateway: 
+      container_name: api-cloud-gateway
+      image: fabianhalbig/gateway
+      ports:
+        - 8081:8081
+      environment:
+        KEYCLOAK_SERVICE_ADDRESS: http://keycloak:8080/auth/
+        KEYCLOAK_REALM: demo-realm
+        KEYCLOAK_CLIENT_ID: springboot-keycloak
+        KEYCLOAK_CLIENT_SECRET: 9vbTc7vwR8hnr9T5peTCJCd0E1ZCbAnJ
+        DISCOVERY: http://discovery:8761/eureka/
+      depends_on:
+        - discovery
+        - user-service
+        - keycloak
+        - course-service
+
+  user-service:
+      container_name: user-service
+      image: fabianhalbig/user-service
+      ports:
+        - 9070:9070
+      environment:
+        - DISCOVERY=http://discovery:8761/eureka/
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://status-db:5432/compose-postgres
+        - SPRING_DATASOURCE_USERNAME=compose-postgres
+        - SPRING_DATASOURCE_PASSWORD=compose-postgres
+        - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      depends_on:
+        - discovery
+        - keycloak
+
+  status-db:
+      image: postgres:13.1-alpine
+      container_name: status-db
+      ports: 
+        - 5432:5432
+      environment:
+        - POSTGRES_USER=compose-postgres
+        - POSTGRES_PASSWORD=compose-postgres
+      volumes:
+        - status-data:/var/lib/postgresql/data
+
+  course-service:
+      image: fabianhalbig/course-service
+      container_name: course-service
+      ports:
+        - 9080:9080
+      depends_on:
+        - discovery
+        - course-db
+      environment:
+        - DISCOVERY=http://discovery:8761/eureka/
+        - KEYCLOAK_CLIENT_ID=springboot-keycloak
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://course-db:5433/compose-postgres
+        - SPRING_DATASOURCE_USERNAME=compose-postgres
+        - SPRING_DATASOURCE_PASSWORD=compose-postgres
+        - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+        - SPRING_JPA_DATABASE-PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+
+  course-db:
+    image: postgres:13.1-alpine
+    container_name: course-db
+    expose:
+      - "5433"
+    ports: 
+      - 5433:5433
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+    volumes:
+      - course-data:/var/lib/postgresql/data
+    command: -p 5433
+
+volumes:
+  keycloak-data: 
+  course-data: 
+  status-data: 
+

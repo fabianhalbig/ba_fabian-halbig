@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: course-service
+  labels:
+    app: course-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: course-service
+  template:
+    metadata:
+      labels:
+        app: course-service
+    spec:
+      containers:
+        - name: course-service
+          image: fabianhalbig/course-service:gcp
+          imagePullPolicy: Alwayskub
+          ports:
+            - containerPort: 9080
+          env:
+            - name: KEYCLOAK_CLIENT_ID
+              value: springboot-keycloak
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://course-db:5432/courses
+            - name: SPRING_DATASOURCE_USERNAME
+              value: courseUser
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: db-password
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+            - name: SPRING_JPA_DATABASE-PLATFORM
+              value: org.hibernate.dialect.PostgreSQLDialect
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: course-service
+spec:
+  ports:
+    - targetPort: 9080
+      port: 80
+  selector:
+    app: course-service

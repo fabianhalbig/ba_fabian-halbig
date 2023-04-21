@@ -1,0 +1,74 @@
+<div class="container-fluid">
+  <div class="row justify-content-center bg-light">
+    <div class="col-12">
+      <h4 class="display-4">Ihr Aufgaben</h4>
+      <hr class="my-4" />
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <h5>Status der zu bearbeiteten Tasks des Courses:</h5>
+  <div class="card" *ngFor="let s of statusOfTasks | keyvalue">
+    <span *ngIf="s.value[0] == ''"
+      >Sie haben keinen Task der erledigt werden muss!</span
+    >
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <div class="card-body">
+          <h5 class="card-title">{{ s.value[0] }}</h5>
+          <p class="card-text">{{ s.value[1] }}</p>
+          <p class="deadline" style="color: red">{{ s.value[2] }}</p>
+        </div>
+      </div>
+      <div class="col-md-2" *ngIf="s.value[3] == 'NEU'">
+        <button class="btn btn-secondary">Nicht bearbeitet</button>
+      </div>
+      <div class="col-md-2" *ngIf="s.value[3] == 'OFFEN'">
+        <button class="btn btn-warning">Wieder geöffnet</button>
+      </div>
+      <div class="col-md-2" *ngIf="s.value[3] == 'IN_ARBEIT'">
+        <button class="btn btn-primary">In Bearbeitung</button>
+      </div>
+      <div class="col-md-2" *ngIf="s.value[3] == 'FERTIG'">
+        <button class="btn btn-sm btn-success">Erledigt</button>
+      </div>
+      <div
+        class="col-md-2"
+        *ngIf="s.value[3] == 'NEU'"
+        (click)="setStatusInProgress(s.value[4])"
+      >
+        <button type="submit" class="btn btn-outline-dark">
+          Bearbeitung starten
+        </button>
+      </div>
+
+      <div
+        class="col-md-2"
+        *ngIf="s.value[3] == 'OFFEN'"
+        (click)="setStatusInProgress(s.value[4])"
+      >
+        <button type="submit" class="btn btn-outline-dark">
+          Bearbeitung erneut starten
+        </button>
+      </div>
+
+      <div
+        class="col-md-2"
+        *ngIf="s.value[3] == 'IN_ARBEIT'"
+        (click)="setStatusToDone(s.value[4])"
+      >
+        <button type="submit" class="btn btn-outline-dark">
+          Fertigstellen
+        </button>
+      </div>
+      <div
+        class="col-md-2"
+        *ngIf="s.value[3] == 'FERTIG'"
+        (click)="reopenTask(s.value[4])"
+      >
+        <button type="submit" class="btn btn-outline-dark">Zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+</div>
